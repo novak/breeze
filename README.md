@@ -8,9 +8,17 @@ Breeze is a very simple weather app still under development. I currently do not 
 
 This project will provide an opportunity to experiment with new platform features and functionality in a product simple enough to iterate on.
 
+Breeze runs on Android 4.4 and higher.
+
+### Data Source API Keys
+
 Prior to building and running the application, you'll need to obtain API keys from [Dark Sky](https://darksky.net/dev) and [Weather Underground](https://www.wunderground.com/weather/api).
 
-Breeze runs on Android 4.4 and higher.
+Copy the keys.properties.example file to keys.properties:
+
+        $ cp keys.properties.example keys.properties
+
+Open the keys.properties file and enter your keys where the placeholders are. This will make the keys available through the BuildConfig class in Java.
 
 ### Features
 

@@ -1,0 +1,5 @@
+ext {
+    dark_sky_api_key = "<DARK_SKY_API_KEY_HERE>"
+    wunderground_api_key = "<WUNDERGROUND_API_KEY_HERE>"
+}
+
