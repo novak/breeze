@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2017 Michael Novak <michael.novakjr@gmail.com>.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+    <color name="colorAccent">#FF4081</color>
+    <color name="text_color_light">#FFFFFF</color>
+
+    <color name="colorPrimary">#3185FC</color>
+    <color name="colorPrimaryDark">#2572FB</color>
+    <color name="contentColor">#FFFFFF</color>
+
+    <color name="colorPrimaryNight">#101938</color>
+    <color name="colorPrimaryNightDark">#0C122B</color>
+    <color name="contentColorNight">#FFFFFF</color>
+
+    <color name="colorPrimarySnow">#FDFDFD</color>
+    <color name="colorPrimarySnowDark">#E0E0E0</color>
+    <color name="contentColorSnow">#DD000000</color>
+
+    <color name="colorPrimaryCloudy">#DED9E2</color>
+    <color name="colorPrimaryCloudyDark">#D5CFDA</color>
+    <color name="contentColorCloudy">#DD000000</color>
+
+    <color name="background_forecast">#1A000000</color>
+</resources>

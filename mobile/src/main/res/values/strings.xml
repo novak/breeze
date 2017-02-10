@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2017 Michael Novak <michael.novakjr@gmail.com>.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+    <string name="app_name">Breeze</string>
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_refresh">Refresh</string>
+
+    <string name="label_current_location">Current Location</string>
+    <string name="label_current_conditions">Current Conditions</string>
+    <string name="label_forecast_conditions">Forecast Conditions</string>
+
+    <string name="wind_speed">%1$d mph</string>
+    <string name="wind_speed_si">%1d kph</string>
+    <string name="wind_description">wind</string>
+
+    <string name="humidity_percentage">%1$d%%</string>
+    <string name="humidity_description">humidity</string>
+
+    <string name="precipitation_percentage">%1$d%%</string>
+    <string name="precipitation_description">chance of %1$s</string>
+
+    <string name="temperature">%1$d&#xb0;</string>
+
+    <string name="data_source_attribution">Data source attribution</string>
+    <string name="dark_sky_attribution">Dark sky data attribution</string>
+
+    <string name="preference_data_source">Weather Data Source</string>
+    <string name="preference_value_dark_sky" translatable="false">darksky</string>
+    <string name="preference_value_wunderground" translatable="false">wunderground</string>
+    <string name="preference_label_dark_sky" translatable="false">Dark Sky</string>
+    <string name="preference_label_wunderground" translatable="false">Weather Underground</string>
+
+    <string name="preference_units">Measurement Units</string>
+    <string name="preference_value_us">us</string>
+    <string name="preference_value_si">si</string>
+    <string name="preference_label_us">Imperial (Fahrenheit, Inches, Miles per hour)</string>
+    <string name="preference_label_si">SI (Celsius, Centimeters, Meters per second)</string>
+</resources>
