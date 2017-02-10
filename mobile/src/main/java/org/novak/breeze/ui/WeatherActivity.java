@@ -17,7 +17,10 @@
 package org.novak.breeze.ui;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -26,6 +29,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -34,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -51,6 +56,11 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
         GoogleApiClient.OnConnectionFailedListener {
     public static final String EXTRA_LOCATION_LABEL = "location_label";
     public static final String EXTRA_THEME = "theme";
+    public static final String EXTRA_RESOLVING_ERROR = "resolving_error";
+
+    private static final String DIALOG_ERROR = "dialog_error";
+    private static final int REQUEST_RESOLVE_ERROR = 1001;
+    private boolean isResolvingError = false;
 
     private GoogleApiClient client;
     private String locationLabel;
@@ -64,6 +74,7 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
 
         if (savedInstanceState != null) {
             locationLabel = savedInstanceState.getString(EXTRA_LOCATION_LABEL);
+            isResolvingError = savedInstanceState.getBoolean(EXTRA_RESOLVING_ERROR, false);
 
             theme = ThemeManager.WeatherTheme.values()[savedInstanceState.getInt(EXTRA_THEME)];
             updateTheme(theme);
@@ -134,6 +145,7 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(EXTRA_LOCATION_LABEL, locationLabel);
         outState.putInt(EXTRA_THEME, theme.ordinal());
+        outState.putBoolean(EXTRA_RESOLVING_ERROR, isResolvingError);
 
         super.onSaveInstanceState(outState);
     }
@@ -144,13 +156,25 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onConnectionSuspended(int cause) {
         //TODO: implement case where play services become temporarily unavailable.
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        //TODO: implement case where play services become unavailable.
+        if (!isResolvingError) {
+            isResolvingError = true;
+
+            if (connectionResult.hasResolution()) {
+                try {
+                    connectionResult.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
+                } catch (IntentSender.SendIntentException e) {
+                    client.connect();
+                }
+            } else {
+                showPlayServicesErrorDialog(connectionResult.getErrorCode());
+            }
+        }
     }
 
     @Override
@@ -160,6 +184,29 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
         } else {
             //TODO: implement case where user denied access to location.
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_RESOLVE_ERROR) {
+            isResolvingError = false;
+
+            if (resultCode == RESULT_OK) {
+                if (!client.isConnecting() && !client.isConnected()) {
+                    client.connect();
+                }
+            }
+        }
+    }
+
+    private void showPlayServicesErrorDialog(int errorCode) {
+        ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+
+        Bundle args = new Bundle();
+        args.putInt(DIALOG_ERROR, errorCode);
+        errorFragment.setArguments(args);
+
+        errorFragment.show(getSupportFragmentManager(), "error_dialog");
     }
 
     private void determineCurrentLocation() {
@@ -184,6 +231,10 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
 
         ThemeManager.applyTheme(getWindow(), theme);
         ThemeManager.applyTheme(getToolbar(), theme);
+    }
+
+    void onDialogDismissed() {
+        isResolvingError = false;
     }
 
     static class ForecastAsyncTask extends AsyncTask<Location, Void, Weather> {
@@ -265,6 +316,21 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
                 activity.locationLabel = locationLabel;
                 activity.getToolbar().setTitle(locationLabel);
             }
+        }
+    }
+
+    public static class ErrorDialogFragment extends DialogFragment {
+        public ErrorDialogFragment() { }
+
+        @Override @NonNull
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            int errorCode = getArguments().getInt(DIALOG_ERROR);
+            return GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, REQUEST_RESOLVE_ERROR);
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            ((WeatherActivity) getActivity()).onDialogDismissed();
         }
     }
 }
