@@ -35,7 +35,8 @@ public class ForecastFragment extends Fragment {
     private List<ForecastDayView> dayViews;
 
     @Nullable @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_forecast, container, false);
     }
 
@@ -51,7 +52,7 @@ public class ForecastFragment extends Fragment {
         dayViews.add((ForecastDayView) view.findViewById(R.id.forecast_day_five));
     }
 
-    public void updateForcast(List<Forecast> forecasts, ThemeManager.WeatherTheme theme) {
+    public void updateForecast(List<Forecast> forecasts, ThemeManager.WeatherTheme theme) {
         for (int i = 0; i < NUM_DAYS; i++) {
             dayViews.get(i).setForecast(forecasts.get(i), theme);
         }

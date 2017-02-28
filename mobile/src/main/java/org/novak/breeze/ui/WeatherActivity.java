@@ -273,7 +273,7 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
                         .findFragmentById(R.id.frame_forecast);
 
                 if (forecastFragment != null) {
-                    forecastFragment.updateForcast(weather.dailyForecasts, weather.getTheme());
+                    forecastFragment.updateForecast(weather.dailyForecasts, weather.getTheme());
                 }
 
                 activity.updateTheme(weather.getTheme());
