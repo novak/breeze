@@ -26,6 +26,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -40,6 +41,13 @@ import android.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import org.novak.breeze.R;
@@ -111,7 +119,9 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
 
     @Override
     protected void onStop() {
+        removeLocationUpdates();
         client.disconnect();
+
         super.onStop();
     }
 
@@ -181,9 +191,9 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] results) {
         if (results[0] == PackageManager.PERMISSION_GRANTED) {
             determineCurrentLocation();
-        } else {
-            //TODO: implement case where user denied access to location.
         }
+
+        //TODO: implement case where user denied access to location.
     }
 
     @Override
@@ -219,10 +229,23 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
                 new GeocodeAsyncTask(new Geocoder(this, Locale.getDefault()), this).execute(location);
                 new ForecastAsyncTask(this).execute(location);
             } else {
-                //TODO: implement case where current location is unavailable.
+                PendingResult<Status> result = LocationServices.FusedLocationApi.requestLocationUpdates(client,
+                        LocationRequest.create(), locationCallback, Looper.getMainLooper());
+                result.setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        //TODO: alert the user if status is not success.
+                    }
+                });
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+        }
+    }
+
+    private void removeLocationUpdates() {
+        if (client.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(client, locationCallback);
         }
     }
 
@@ -237,7 +260,27 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
         isResolvingError = false;
     }
 
-    static class ForecastAsyncTask extends AsyncTask<Location, Void, Weather> {
+    private LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            Location location = locationResult.getLocations().get(0);
+
+            if (location != null) {
+                new GeocodeAsyncTask(new Geocoder(WeatherActivity.this, Locale.getDefault()), WeatherActivity.this)
+                        .execute(location);
+                new ForecastAsyncTask(WeatherActivity.this).execute(location);
+
+                removeLocationUpdates();
+            }
+        }
+
+        @Override
+        public void onLocationAvailability(LocationAvailability locationAvailability) {
+            Log.d("Breeze", "Location availability: " + locationAvailability.isLocationAvailable());
+        }
+    };
+
+    private static class ForecastAsyncTask extends AsyncTask<Location, Void, Weather> {
         private WeakReference<WeatherActivity> activityRef;
 
         ForecastAsyncTask(WeatherActivity activity) {
@@ -281,7 +324,7 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
         }
     }
 
-    static class GeocodeAsyncTask extends AsyncTask<Location, Void, String> {
+    private static class GeocodeAsyncTask extends AsyncTask<Location, Void, String> {
         private Geocoder geocoder;
         private WeakReference<WeatherActivity> activityRef;
 
@@ -298,8 +341,17 @@ public class WeatherActivity extends BaseActivity implements GoogleApiClient.Con
             try {
                 List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
 
-                if (addresses != null) {
-                    locationLabel = addresses.get(0).getLocality();
+                if (addresses != null && addresses.size() > 0) {
+                    Address address = addresses.get(0);
+                    locationLabel = address.getLocality();
+
+                    if (locationLabel == null) {
+                        locationLabel = address.getAddressLine(1);
+
+                        if (locationLabel.indexOf(',') != -1) {
+                            locationLabel = locationLabel.substring(0, locationLabel.indexOf(','));
+                        }
+                    }
                 }
             } catch (IOException e) {
                 Log.e("Breeze", "Unable to geocode the provided location: " + location);
